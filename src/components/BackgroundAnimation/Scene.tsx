@@ -7,13 +7,12 @@ import {
   Environment,
   Effects,
   useTexture,
-  Line,
   Float,
   Stars,
   Trail,
 } from "@react-three/drei";
 import { LUTPass, LUTCubeLoader } from "three-stdlib";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useRef, useState, RefObject } from "react";
 import * as THREE from "three";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 
@@ -36,42 +35,52 @@ function Sphere(props: any) {
       <sphereGeometry args={[1, 64, 64]} />
       <meshPhysicalMaterial
         map={texture}
-        clearcoat={5}
-        clearcoatRoughness={0}
-        roughness={1}
-        metalness={0.5}
+        clearcoat={0}
+        clearcoatRoughness={5}
+        roughness={0}
+        metalness={0}
         emissive={0}
       />
     </mesh>
   );
 }
 
-const Electron = ({ radius = 2.75, speed = 6, ...props }) => {
-  const ref = useRef();
+const Electron = () => {
+  const ref: RefObject<THREE.Mesh> = useRef<THREE.Mesh>(null);
+  const [initialPosition] = useState(() => {
+    const angle = 1; // Random angle in radians
+    const inclination = 1; // Random inclination between -π/2 and π/2
+    const distance = 16; // Random distance between 5 and 10
+    const x = Math.cos(angle) * Math.cos(inclination) * distance;
+    const y = Math.sin(inclination) * distance;
+    const z = Math.sin(angle) * Math.cos(inclination) * distance;
+    return [x, y, z];
+  });
+  const [speed] = useState(() => Math.random() * 5 + 1); // Random speed between 1 and 6
 
   useFrame((state) => {
-    const t = state.clock.getElapsedTime() * speed;
+    const t = state.clock.oldTime * speed;
     if (ref.current) {
       ref.current.position.set(
-        Math.tan(t) * radius,
-        (Math.cos(t) * radius * Math.atan(t)) / Math.PI / 1.25,
-        Math.tan(t) * radius
+        Math.tan(t) * initialPosition[0],
+        (Math.cos(t) * Math.atan(t)) / Math.PI / 1.05 + initialPosition[1],
+        Math.sin(t) * initialPosition[1]
       );
     }
   });
 
   return (
-    <group {...props}>
+    <group>
       <Trail
         local
-        width={3}
-        length={8}
-        color={new THREE.Color(2, 1, 10)}
+        width={1}
+        length={10}
+        color={new THREE.Color(1, 1, 10)}
         attenuation={(t) => t * t}
       >
         <mesh ref={ref}>
-          <sphereGeometry args={[0.05]} />
-          <meshBasicMaterial color={[1, 1, 10]} toneMapped={false} />
+          <sphereGeometry args={[0.0001]} />
+          <meshBasicMaterial color={[2, 1, 10]} toneMapped={false} />
         </mesh>
       </Trail>
     </group>
@@ -80,37 +89,49 @@ const Electron = ({ radius = 2.75, speed = 6, ...props }) => {
 
 const Scene = () => {
   return (
-    <Canvas frameloop="demand" camera={{ position: [0, 0, 5], fov: 65 }}>
+    <Canvas frameloop="demand" camera={{ position: [1, 4, 3], fov: 125 }}>
       <spotLight
-        intensity={1}
+        intensity={0.5}
         angle={0.2}
         penumbra={1}
-        position={[1, 15, 10]}
+        position={[1, 0, 10]}
       />
 
       <group>
-        {[0, 2, -2].map((x, index) => (
-          <Float
-            key={index}
-            speed={4}
-            rotationIntensity={1}
-            floatIntensity={2}
-            position={[x, 0, 0]}
-          >
-            <Electron />
-          </Float>
-        ))}
+        <Float>
+          <Electron />
+          <Electron />
+          <Electron />
+        </Float>
+
+        <Float>
+          <Electron />
+          <Electron />
+          <Electron />
+        </Float>
+
+        <Float>
+          <Electron />
+          <Electron />
+          <Electron />
+        </Float>
+
+        <Float>
+          <Electron />
+          <Electron />
+          <Electron />
+        </Float>
       </group>
 
       <Sphere />
 
-      <Stars saturation={0} count={500} speed={0.5} />
+      <Stars saturation={0.8} count={500} speed={1} />
 
       <EffectComposer>
         <Bloom mipmapBlur luminanceThreshold={1} radius={0.7} />
       </EffectComposer>
 
-      <Environment preset="dawn" background blur={0.6} />
+      <Environment preset="city" background blur={0.2} />
 
       <Grading />
       <OrbitControls autoRotate autoRotateSpeed={2} />

@@ -1,142 +1,200 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Canvas, extend, useFrame, useLoader } from "@react-three/fiber";
-import {
-  OrbitControls,
-  Environment,
-  Effects,
-  useTexture,
-  Float,
-  Stars,
-  Trail,
-} from "@react-three/drei";
-import { LUTPass, LUTCubeLoader } from "three-stdlib";
-import { useRef, useState, RefObject } from "react";
 import * as THREE from "three";
-import { EffectComposer, Bloom } from "@react-three/postprocessing";
+import { createContext, useContext, useRef, useState } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import {
+  Clouds,
+  Cloud,
+  CameraShake,
+  Environment,
+  OrbitControls,
+  ContactShadows,
+  PerspectiveCamera,
+  Stars,
+} from "@react-three/drei";
+import {
+  CuboidCollider,
+  BallCollider,
+  Physics,
+  RigidBody,
+} from "@react-three/rapier";
+import { random } from "maath";
+import { Grading } from "./Grading";
+import { Globe } from "./Globe";
+import { Lightning } from "./Lightning";
 
-extend({ LUTPass });
+const context = createContext<any>(null);
 
-function Grading() {
-  const { texture3D } = useLoader(LUTCubeLoader, "/F-6800-STD.cube");
+export default function App() {
+  const shake = useRef();
+
   return (
-    <Effects>
-      {/* @ts-ignore  */}
-      <lUTPass lut={texture3D} intensity={1} />
-    </Effects>
-  );
-}
+    <Canvas>
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[0, 10, 0]} intensity={0.5} />
+      <Environment background preset="night" blur={0.1} />
+      <Stars saturation={0.3} factor={1} speed={5} />
 
-function Sphere(props: any) {
-  const texture = useTexture("/thunder.jpg");
-  return (
-    <mesh {...props}>
-      <sphereGeometry args={[1, 64, 64]} />
-      <meshPhysicalMaterial
-        map={texture}
-        clearcoat={0}
-        clearcoatRoughness={5}
-        roughness={0}
-        metalness={0}
-        emissive={0}
+      <OrbitControls
+        makeDefault
+        autoRotate
+        enableZoom={true}
+        enablePan={false}
+        maxDistance={60}
       />
-    </mesh>
-  );
-}
-
-const Electron = () => {
-  const ref: RefObject<THREE.Mesh> = useRef<THREE.Mesh>(null);
-  const [initialPosition] = useState(() => {
-    const angle = 1; // Random angle in radians
-    const inclination = 1; // Random inclination between -π/2 and π/2
-    const distance = 16; // Random distance between 5 and 10
-    const x = Math.cos(angle) * Math.cos(inclination) * distance;
-    const y = Math.sin(inclination) * distance;
-    const z = Math.sin(angle) * Math.cos(inclination) * distance;
-    return [x, y, z];
-  });
-  const [speed] = useState(() => Math.random() * 5 + 1); // Random speed between 1 and 6
-
-  useFrame((state) => {
-    const t = state.clock.oldTime * speed;
-    if (ref.current) {
-      ref.current.position.set(
-        Math.tan(t) * initialPosition[0],
-        (Math.cos(t) * Math.atan(t)) / Math.PI / 1.05 + initialPosition[1],
-        Math.sin(t) * initialPosition[1]
-      );
-    }
-  });
-
-  return (
-    <group>
-      <Trail
-        local
-        width={1}
-        length={10}
-        color={new THREE.Color(1, 1, 10)}
-        attenuation={(t) => t * t}
-      >
-        <mesh ref={ref}>
-          <sphereGeometry args={[0.0001]} />
-          <meshBasicMaterial color={[2, 1, 10]} toneMapped={false} />
-        </mesh>
-      </Trail>
-    </group>
-  );
-};
-
-const Scene = () => {
-  return (
-    <Canvas frameloop="demand" camera={{ position: [1, 4, 3], fov: 125 }}>
-      <spotLight
-        intensity={0.5}
-        angle={0.2}
-        penumbra={1}
-        position={[1, 0, 10]}
-      />
-
-      <group>
-        <Float>
-          <Electron />
-          <Electron />
-          <Electron />
-        </Float>
-
-        <Float>
-          <Electron />
-          <Electron />
-          <Electron />
-        </Float>
-
-        <Float>
-          <Electron />
-          <Electron />
-          <Electron />
-        </Float>
-
-        <Float>
-          <Electron />
-          <Electron />
-          <Electron />
-        </Float>
-      </group>
-
-      <Sphere />
-
-      <Stars saturation={0.8} count={500} speed={1} />
-
-      <EffectComposer>
-        <Bloom mipmapBlur luminanceThreshold={1} radius={0.7} />
-      </EffectComposer>
-
-      <Environment preset="city" background blur={0.2} />
-
       <Grading />
-      <OrbitControls autoRotate autoRotateSpeed={2} />
+      <Globe />
+
+      <PerspectiveCamera makeDefault position={[7, 19, 18]} fov={30}>
+        <spotLight
+          position={[0, 40, 2]}
+          angle={0.5}
+          decay={1}
+          distance={45}
+          penumbra={1}
+          intensity={2000}
+        />
+        <spotLight
+          position={[-19, 0, -8]}
+          color="red"
+          angle={0.25}
+          decay={0.75}
+          distance={185}
+          penumbra={-1}
+          intensity={400}
+        />
+      </PerspectiveCamera>
+
+      <context.Provider value={shake}>
+        <CameraShake
+          ref={shake}
+          decay
+          decayRate={0.95}
+          maxYaw={0.05}
+          maxPitch={0.01}
+          yawFrequency={4}
+          pitchFrequency={2}
+          rollFrequency={2}
+          intensity={0}
+        />
+        <Clouds limit={400} material={THREE.MeshLambertMaterial}>
+          <spotLight
+            position={[0, 40, 2]}
+            angle={0.5}
+            decay={1}
+            distance={45}
+            penumbra={1}
+          />
+
+          <spotLight
+            position={[-19, 0, -8]}
+            color="#f10018b9"
+            angle={0.25}
+            decay={0.75}
+            distance={185}
+            penumbra={-1}
+            intensity={400}
+          />
+          <Physics gravity={[0, 0, 0]}>
+            <Pointer />
+            <Puffycloud seed={30} position={[50, 5, 50]} />
+
+            <Lightning />
+
+            <Puffycloud seed={20} position={[12, 6, -50]} />
+          </Physics>
+        </Clouds>
+      </context.Provider>
     </Canvas>
   );
-};
+}
 
-export default Scene;
+function Puffycloud({
+  seed,
+  vec = new THREE.Vector3(),
+  ...props
+}: {
+  [key: string]: any;
+}) {
+  const api = useRef<any>();
+  const light = useRef<any>();
+  const rig = useContext<any>(context);
+  const [flash] = useState(
+    () => new random.FlashGen({ count: 10, minDuration: 40, maxDuration: 200 })
+  );
+  const contact = (payload: {
+    other: { rigidBodyObject?: { userData?: { cloud?: any } } };
+    totalForceMagnitude: number;
+  }) =>
+    payload.other?.rigidBodyObject?.userData?.cloud &&
+    payload.totalForceMagnitude / 1000 > 100 &&
+    flash.burst();
+  useFrame((state, delta) => {
+    const impulse = flash.update(state.clock.elapsedTime, delta);
+    light.current.intensity = impulse * 15000;
+    if (impulse === 1) rig?.current?.setIntensity(1);
+    api.current?.applyImpulse(
+      vec.copy(api.current.translation()).negate().multiplyScalar(10)
+    );
+  });
+  return (
+    <RigidBody
+      ref={api}
+      userData={{ cloud: true }}
+      onContactForce={contact}
+      linearDamping={4}
+      angularDamping={1}
+      friction={0.1}
+      {...props}
+      colliders={false}
+    >
+      <BallCollider args={[4]} />
+      <Cloud
+        seed={seed}
+        fade={30}
+        speed={0.1}
+        growth={4}
+        segments={40}
+        volume={10}
+        opacity={0.6}
+        bounds={[10, 20, 50]}
+      />
+      <Cloud
+        seed={seed + 1}
+        fade={30}
+        position={[55, 52, 82]}
+        speed={0.1}
+        growth={3}
+        volume={10}
+        opacity={0.5}
+        bounds={[16, 10, 60]}
+      />
+      <pointLight
+        position={[0, 0, 0.5]}
+        ref={light}
+        color="blue"
+        intensity={0.8}
+      />
+    </RigidBody>
+  );
+}
+
+function Pointer({ vec = new THREE.Vector3(), dir = new THREE.Vector3() }) {
+  const ref = useRef<any>();
+  useFrame(({ pointer, camera }) => {
+    vec.set(pointer.x, pointer.y, 0.5).unproject(camera);
+    dir.copy(vec).sub(camera.position).normalize();
+    vec.add(dir.multiplyScalar(camera.position.length()));
+    ref.current?.setNextKinematicTranslation(vec);
+  });
+  return (
+    <RigidBody
+      userData={{ cloud: true }}
+      type="kinematicPosition"
+      colliders={false}
+      ref={ref}
+    >
+      <BallCollider args={[4]} />
+    </RigidBody>
+  );
+}

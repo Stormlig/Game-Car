@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useBox, useRaycastVehicle } from "@react-three/cannon";
 import { useEffect, useRef } from "react";
 import { useFrame, useLoader } from "react-three-fiber";
@@ -7,7 +8,7 @@ import { WheelDebug } from "./WheelsDebug";
 import { useControls } from "../../hook/useControls";
 import { Mesh, Quaternion, Vector3 } from "three";
 
-export function Car({ thirdPerson }) {
+export function Car({ thirdPerson }: { thirdPerson: any }) {
   const result = useLoader(GLTFLoader, "/range_rover_sport_2018.glb").scene;
 
   const position: [number, number, number] = [-1.5, 0.5, 3];
@@ -18,7 +19,7 @@ export function Car({ thirdPerson }) {
 
   const chassisBodyArgs: [number, number, number] = [width, height, front * 2];
 
-  const [chassisBody, chassisApi] = useBox(
+  const [chassisBody, chassisApi] = useBox<any>(
     () => ({
       allowSleep: false,
       args: chassisBodyArgs,
@@ -30,7 +31,7 @@ export function Car({ thirdPerson }) {
 
   const { wheels, wheelInfos } = useWheels(width, height, front, wheelRadius);
 
-  const [vehicle, vehicleApi] = useRaycastVehicle(
+  const [vehicle, vehicleApi] = useRaycastVehicle<any>(
     () => ({
       chassisBody,
       wheelInfos,
@@ -79,7 +80,7 @@ export function Car({ thirdPerson }) {
     });
   }, [result]);
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     const t = state.clock.getElapsedTime();
 
     const wheel = result.children[0].children[0].children[0];

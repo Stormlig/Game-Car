@@ -31,7 +31,7 @@ export function Scene() {
 
   return (
     <Suspense fallback={null}>
-      <Environment files={"/envmap.hdr"} background={"only"} />
+      <Environment files={"/envmap.hdr"} background={true} />
 
       <PerspectiveCamera makeDefault position={cameraPosition} fov={40} />
       {!thirdPerson && <OrbitControls target={[-2.64, -0.71, 0.03]} />}

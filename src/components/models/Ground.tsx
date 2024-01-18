@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-empty-pattern */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { usePlane } from "@react-three/cannon";
 import { MeshReflectorMaterial } from "@react-three/drei";
@@ -10,7 +12,7 @@ interface ExtendedMesh extends Mesh {
 }
 
 export function Ground() {
-  const [ref] = usePlane(
+  const [] = usePlane(
     () => ({
       type: "Static",
       rotation: [-Math.PI / 2, 0, 0],

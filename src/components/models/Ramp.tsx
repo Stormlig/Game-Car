@@ -22,4 +22,7 @@ export function Ramp() {
     }),
     useRef(null)
   );
+
+  // Retorna um elemento JSX (por exemplo, <mesh />) aqui
+  return <mesh geometry={geometry} />;
 }

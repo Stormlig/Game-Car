@@ -28,7 +28,6 @@ export function Track() {
   return (
     <>
       <mesh geometry={geometry}>
-        {/* <primitive object={geometry} attach={"geometry"} /> */}
         <meshBasicMaterial toneMapped={false} map={colorMap} />
       </mesh>
       <ColliderBox position={[1.75, 0, 0.5]} scale={[0.3, 1, 0.3]} />
@@ -67,5 +66,3 @@ export function Track() {
     </>
   );
 }
-
-// useGLTF.preload("/track.glb");

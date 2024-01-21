@@ -15,7 +15,7 @@ import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import { useWheels } from "../../hook/useWheels";
 import { WheelDebug } from "./WheelsDebug";
 import { useControls } from "../../hook/useControls";
-import { Mesh, Quaternion, Vector3 } from "three";
+import { Quaternion, Vector3 } from "three";
 
 export function Car({ thirdPerson }: { thirdPerson: any }) {
   const result = useLoader(GLTFLoader, "/range_rover_sport_2018.glb").scene;
@@ -81,25 +81,7 @@ export function Car({ thirdPerson }: { thirdPerson: any }) {
 
     result.scale.set(0.1, 0.1, 0.1);
     result.children[0].position.set(0, -0.19, 0);
-    result.traverse((objcet) => {
-      if (objcet instanceof Mesh) {
-        objcet.castShadow = true;
-        objcet.receiveShadow = true;
-      }
-    });
   }, [result]);
-
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime();
-
-    const wheel = result.children[0].children[0].children[0];
-
-    // Aplique a rotação apenas ao eixo Y
-    wheel.children[0].rotateX(t * 2);
-    wheel.children[2].rotateX(t * 8);
-    wheel.children[3].rotateX(t * 4);
-    wheel.children[4].rotateX(t * 6);
-  });
 
   return (
     <group ref={vehicle} name="vehicle">
@@ -115,6 +97,7 @@ export function Car({ thirdPerson }: { thirdPerson: any }) {
         <meshBasicMaterial transparent={true} opacity={0.3} />
         <boxGeometry args={chassisBodyArgs} />
       </mesh> */}
+
       <WheelDebug wheelRef={wheels[0]} radius={wheelRadius} />
       <WheelDebug wheelRef={wheels[1]} radius={wheelRadius} />
       <WheelDebug wheelRef={wheels[2]} radius={wheelRadius} />

@@ -17,12 +17,17 @@ export function Ramp() {
   const [] = useTrimesh(
     () => ({
       args: [vertices, indices],
-      mass: 0,
+      mass: 10,
       type: "Static",
     }),
     useRef(null)
   );
 
-  // Retorna um elemento JSX (por exemplo, <mesh />) aqui
-  return <mesh geometry={geometry} />;
+  return (
+    <group>
+      <mesh geometry={geometry}>
+        <meshBasicMaterial attach="material" color={"black"} />
+      </mesh>
+    </group>
+  );
 }

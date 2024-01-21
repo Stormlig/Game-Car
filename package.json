@@ -21,7 +21,8 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.1",
     "react-three-fiber": "^6.0.13",
-    "three": "^0.159.0"
+    "three": "^0.159.0",
+    "three-stdlib": "^2.8.12"
   },
   "devDependencies": {
     "@types/react": "^18.2.47",

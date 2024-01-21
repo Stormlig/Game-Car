@@ -27,7 +27,7 @@ export const useWheels = (
     axleLocal: [1, 0, 0],
     suspensionStiffness: 60,
     suspensionRestLength: 0.1,
-    frictionSlip: 5,
+    frictionSlip: 1.5,
     dampingRelaxation: 2.3,
     dampingCompression: 4.4,
     maxSuspensionForce: 100000,
@@ -65,7 +65,7 @@ export const useWheels = (
     mass: 1,
     shapes: [
       {
-        args: [wheelInfo.radius, wheelInfo.radius, 0.015, 16],
+        args: [wheelInfo.radius, wheelInfo.radius, 0.5, 16],
         rotation: [0, 0, -Math.PI / 2],
         type: "Cylinder",
       } as BodyProps & {
@@ -79,6 +79,8 @@ export const useWheels = (
   useCompoundBody(propsFunc, wheels[1]);
   useCompoundBody(propsFunc, wheels[2]);
   useCompoundBody(propsFunc, wheels[3]);
+
+
 
   return { wheels, wheelInfos };
 };

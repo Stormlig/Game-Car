@@ -12,8 +12,8 @@ export const WheelDebug = ({
     debug && (
       <group ref={wheelRef}>
         <mesh rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[radius, radius, 0.015, 16]} />
-          <meshNormalMaterial opacity={0.25} />
+          <cylinderGeometry args={[radius, radius, 0.018, 25]} />
+          <meshNormalMaterial opacity={0.15} />
         </mesh>
       </group>
     )
